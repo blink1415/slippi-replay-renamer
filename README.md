@@ -37,6 +37,9 @@ Currently the supported terms to look for in the replays are the following:
 |                             |                                   |
 |{duration}                   |The duration of the game in number |
 |                             |of frames.                         |
+|{p1_name}, {p2_name}         |Netplay name of player 1 and       |
+|                             |player 2 respectively.             |
+|-----------------------------|-----------------------------------|
 ```
 
 The program will give you an error if you attempt to use a term that is not mentioned in this list.
