@@ -191,9 +191,10 @@ for f in glob.glob('**/*.slp', recursive=True):
     for term in terms:
         value = fetch_entity(term, game)
         filename = filename.replace(term, value)
-    print("----------")
-    print(f)
-    print(path + "/" + filename + ".slp")
+    #print("----------")
+    #print(f)
+    #print(path + "/" + filename + ".slp")
+    print(filename)
     os.rename(f, path + "/" + filename + ".slp")
    # input()
 
