@@ -128,30 +128,47 @@ invalid_characters = '<>:"/\\|?*'
 
 allowed_terms = ("year", "month", "day", "minute", "second", "p1_char", "p2_char", "stage", "duration")
 
+
+#path = pathlib.Path().absolute() + "/"
+
+#Preset templates
 template1 = "{year}-{month}-{day} {p1_char} vs {p2_char} on {stage}"
+
 
 print("Welcome to Slippi Replay Renamer!")
 print("You can use this tool to rename your slippi replays however you like. We have a few template premade, but you can also make your own! The readme file contains information on how to format your own template.")
-print("Press the number corresponding to the template you want to use:")
-print("1. %s" % template1)
-print("0. Custom template")
 
-validchoices = ("0", "1")
+confirmed = False
 
-choice = input()
+while not confirmed:
 
-while choice not in validchoices:
-    print("The choice you entered was not valid. Please try again.")
+    print("Press the number corresponding to the template you want to use:")
+    print("1. %s" % template1)
+    print("0. Custom template")
+
+    validchoices = ("0", "1")
+
     choice = input()
-if choice == "0":
-    print()
-    print("You have chosen to make a custom template.")
-    template = input("Please input your template: ")
-    while not is_template_valid(template):
+
+    while choice not in validchoices:
+        print("The choice you entered was not valid. Please try again.")
+        choice = input()
         print()
-        template = input("How would you like your replays' name to be formatted?")
-elif choice == "1":
-    template = template1
+    if choice == "0":
+        print()
+        print("You have chosen to make a custom template.")
+        template = input("Please input your template: ")
+        while not is_template_valid(template):
+            print()
+            template = input("How would you like your replays' name to be formatted?")
+    elif choice == "1":
+        template = template1
+
+    print()
+    print("Currently selected template: %s" % template)
+    selection = input("Is this the template you want to use? y/n \n")
+    if selection == "y":
+        confirmed = True
 
 terms = re.findall('\{.*?\}',template)
 
@@ -162,7 +179,9 @@ for f in glob.glob('**/*.slp', recursive=True):
         game = Game(f)
     except:
         print("There was an error processing the following game:  \"%s\"" % f)
+        continue
 
+    path = f.split("/")[0]
 
     filename = template
  
@@ -170,5 +189,7 @@ for f in glob.glob('**/*.slp', recursive=True):
         value = fetch_entity(term, game)
         filename = filename.replace(term, value)
     print("----------")
-    print(filename)
-    input()
+    print(f)
+    print(path + "/" + filename + ".slp")
+    os.rename(f, path + "/" + filename + ".slp")
+   # input()
