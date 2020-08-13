@@ -77,6 +77,9 @@ def fetch_entity(entity, game):
     elif entity == "day":
         return str(game.metadata.date.day)
 
+    elif entity == "hour":
+        return str(game.metadata.date.hour)
+
     elif entity == "minute":
         return str(game.metadata.date.minute)
 
@@ -126,7 +129,7 @@ def is_template_valid(template):
 
 invalid_characters = '<>:"/\\|?*'
 
-allowed_terms = ("year", "month", "day", "minute", "second", "p1_char", "p2_char", "stage", "duration")
+allowed_terms = ("year", "month", "day", "hour", "minute", "second", "p1_char", "p2_char", "p1_name", "p2_name", "stage", "duration")
 
 
 #path = pathlib.Path().absolute() + "/"
@@ -155,20 +158,20 @@ while not confirmed:
         choice = input()
         print()
     if choice == "0":
-        print()
-        print("You have chosen to make a custom template.")
+        print("\nYou have chosen to make a custom template.")
         template = input("Please input your template: ")
         while not is_template_valid(template):
-            print()
-            template = input("How would you like your replays' name to be formatted?")
+            template = input("\nHow would you like your replays' name to be formatted?")
     elif choice == "1":
         template = template1
 
-    print()
-    print("Currently selected template: %s" % template)
-    selection = input("Is this the template you want to use? y/n \n")
-    if selection == "y":
-        confirmed = True
+    if len(re.findall('\{.*?\}',template)) == 0:
+        print("Your template has no search terms. Multiple files cannot have the same name, so please select a template with terms.\n")
+    else:
+        print("\nCurrently selected template: %s" % template)
+        selection = input("Is this the template you want to use? y/n \n")
+        if selection == "y":
+            confirmed = True
 
 terms = re.findall('\{.*?\}',template)
 
@@ -193,3 +196,4 @@ for f in glob.glob('**/*.slp', recursive=True):
     print(path + "/" + filename + ".slp")
     os.rename(f, path + "/" + filename + ".slp")
    # input()
+
