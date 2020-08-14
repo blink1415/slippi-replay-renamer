@@ -160,7 +160,10 @@ def is_template_valid(template):
 
 
 #Preset templates
-preset_templates = ["{year}-{month}-{day} {p1_char} vs {p2_char} on {stage}"]
+preset_templates = ["{year}-{month}-{day} {p1_char} vs {p2_char} on {stage}",
+                    "{day}.{month} {hour}:{minute} - {p1_char} vs {p2_char}",
+                    "{month}.{day} {hour}:{minute} - {p1_char} vs {p2_char}",
+                    "{p1_char}-{p2_char}-{stage}"]
 
 
 print("Welcome to Slippi Replay Renamer!")
@@ -192,8 +195,8 @@ while not confirmed:
         template = input("Please input your template: ")
         while not is_template_valid(template):
             template = input("\nHow would you like your replays' name to be formatted?")
-    elif choice == "1":
-        template = template1
+    else:
+        template = preset_templates[int(choice)]
 
     if len(re.findall('\{.*?\}',template)) == 0:
         print("Your template has no search terms. Multiple files cannot have the same name, so please select a template with terms.\n")
