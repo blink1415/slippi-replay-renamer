@@ -3,6 +3,7 @@ import os
 import re
 from slippi import Game  
 
+# More readable character names
 character_names = {
     "InGameCharacter.DR_MARIO": "Dr. Mario",
     "InGameCharacter.MARIO": "Mario",
@@ -33,7 +34,7 @@ character_names = {
     "InGameCharacter.ROY": "Roy"
 }
 
-# More readable stage names for printing to the user
+# More readable stage names
 stage_names = {
     "Stage.FOUNTAIN_OF_DREAMS": "Fountain of Dreams",
     "Stage.POKEMON_STADIUM": "Pokemon Stadium",
@@ -66,8 +67,34 @@ stage_names = {
     "Stage.BATTLEFIELD": "Battlefield",
     "Stage.FINAL_DESTINATION": "Final Destination"
 }
+
+# Characters that are not valid in a file name
+invalid_characters = '<>:"/\\|?*'
+
+# Supported search terms
+allowed_terms = ("year", "month", "day", "hour", "minute", "second", "p1_char", "p2_char", "p1_name", "p2_name", "stage", "duration")
+
+# Gets a value from a game based on the search term given
 def fetch_entity(entity, game):
+    # Removes {} from search term
     entity = entity[1:len(entity) - 1] 
+    
+
+# I wanted to use a dictionary for this, but in the end a
+# switch would work better. Since python doesn't have switches
+# I'm forced to use this ugly if elif mess.
+#
+#    entities = {
+#        "year": str(game.metadata.date.year),
+#        "month": str(game.metadata.date.month),
+#        "day": str(game.metadata.date.day),
+#        "hour": str(game.metadata.date.hour),
+#        "minute": str(game.metadata.date.minute),
+#        "second": str(game.metadata.date.second),
+#        "p1_char": p1_char,
+#        
+#    }
+    
     if entity == "year":
         return str(game.metadata.date.year)
 
@@ -115,10 +142,14 @@ def fetch_entity(entity, game):
         return str(game.metadata.duration)
 
 def is_template_valid(template):
+    
+    # Checks for invalid characters
     if re.search("[<>:\"/\\\\|?*]", template):
         print("The given pattern contains an invalid character.")
         print("The following characters are considered invalid: <>:\"/\\|?*")
         return False
+    
+    # Checks for invalid search terms
     terms = re.findall('\{.*?\}',template)
     for term in terms:
         if term[1:len(term) - 1] not in allowed_terms:
@@ -127,15 +158,9 @@ def is_template_valid(template):
     
     return True
 
-invalid_characters = '<>:"/\\|?*'
-
-allowed_terms = ("year", "month", "day", "hour", "minute", "second", "p1_char", "p2_char", "p1_name", "p2_name", "stage", "duration")
-
-
-#path = pathlib.Path().absolute() + "/"
 
 #Preset templates
-template1 = "{year}-{month}-{day} {p1_char} vs {p2_char} on {stage}"
+preset_templates = ["{year}-{month}-{day} {p1_char} vs {p2_char} on {stage}"]
 
 
 print("Welcome to Slippi Replay Renamer!")
@@ -143,13 +168,16 @@ print("You can use this tool to rename your slippi replays however you like. We 
 
 confirmed = False
 
+validchoices = ("0")
+
+for i in range(0, len(preset_templates)):
+    validchoices = (str(i),) + validchoices
+
 while not confirmed:
-
     print("Press the number corresponding to the template you want to use:")
-    print("1. %s" % template1)
-    print("0. Custom template")
-
-    validchoices = ("0", "1")
+    for i in range(0, len(preset_templates)):
+        print("%d. %s" % (i, preset_templates[i]))
+    print("0. Custom template")    
 
     choice = input()
 
@@ -157,6 +185,8 @@ while not confirmed:
         print("The choice you entered was not valid. Please try again.")
         choice = input()
         print()
+        
+        
     if choice == "0":
         print("\nYou have chosen to make a custom template.")
         template = input("Please input your template: ")
@@ -175,15 +205,18 @@ while not confirmed:
 
 terms = re.findall('\{.*?\}',template)
 
-#print(re.findall('\{.*?\}',template))
 
+# Renames all files in current directory and all subdirectories.
 for f in glob.glob('**/*.slp', recursive=True):
+    
+    # Some games give an error in the parse.py module of py-slippi. I don't know what causes this.
     try:
         game = Game(f)
     except:
         print("There was an error processing the following game:  \"%s\"" % f)
         continue
-
+        
+    # File path needed to make sure files ends up in correct subfolder.
     path = f.split("/")[0]
 
     filename = template
@@ -197,4 +230,3 @@ for f in glob.glob('**/*.slp', recursive=True):
     print(filename)
     os.rename(f, path + "/" + filename + ".slp")
    # input()
-
