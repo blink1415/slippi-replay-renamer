@@ -5,14 +5,14 @@ from slippi import Game
 
 # More readable character names
 character_names = {
-    "InGameCharacter.DR_MARIO": "Dr. Mario",
+    "InGameCharacter.DR_MARIO": "Dr Mario",
     "InGameCharacter.MARIO": "Mario",
     "InGameCharacter.LUIGI": "Luigi",
     "InGameCharacter.BOWSER": "Bowser",
     "InGameCharacter.PEACH": "Peach",
     "InGameCharacter.YOSHI": "Yoshi",
-    "InGameCharacter.DONKEY_KONG": "Donkey Kong",
-    "InGameCharacter.CAPTAIN_FALCON": "Captain Falcon",
+    "InGameCharacter.DONKEY_KONG": "DK",
+    "InGameCharacter.CAPTAIN_FALCON": "Falcon",
     "InGameCharacter.GANONDORF": "Ganondorf",
     "InGameCharacter.FALCO": "Falco",
     "InGameCharacter.FOX": "Fox",
@@ -29,7 +29,7 @@ character_names = {
     "InGameCharacter.PIKACHU": "Pikachu",
     "InGameCharacter.JIGGLYPUFF": "Jigglypuff",
     "InGameCharacter.MEWTWO": "Mewtwo",
-    "InGameCharacter.GAME_AND_WATCH": "Mr. Game & Watch",
+    "InGameCharacter.GAME_AND_WATCH": "G&W",
     "InGameCharacter.MARTH": "Marth",
     "InGameCharacter.ROY": "Roy"
 }
@@ -77,7 +77,7 @@ allowed_terms = ("year", "month", "day", "hour", "minute", "second", "p1_char", 
 # Gets a value from a game based on the search term given
 def fetch_entity(entity, game):
     # Removes {} from search term
-    entity = entity[1:len(entity) - 1] 
+    entity = entity[1:-1] 
     
 
 # I wanted to use a dictionary for this, but in the end a
@@ -134,7 +134,7 @@ def fetch_entity(entity, game):
 
             # Special case to handle Ice Climbers
             if str(char) == "InGameCharacter.POPO":
-                return "Ice Climbers"
+                return "ICs"
 
             # This should only apply to Zelda/Sheik
             if p1_char != "":
@@ -144,23 +144,32 @@ def fetch_entity(entity, game):
 
     elif entity == "p2_char":
         p2_char = ""
-        for char in game.metadata.players[1].characters:
-            
-            # Special case to handle Ice Climbers
-            if str(char) == "InGameCharacter.POPO":
-                return "Ice Climbers"
+        try:
+            for char in game.metadata.players[1].characters:
+                
+                # Special case to handle Ice Climbers
+                if str(char) == "InGameCharacter.POPO":
+                    return "ICs"
 
-            # This should only apply to Zelda/Sheik
-            if p2_char != "":
-                p2_char += "&"
-            p2_char += character_names[str(char)]
+                # This should only apply to Zelda/Sheik
+                if p2_char != "":
+                    p2_char += "&"
+                p2_char += character_names[str(char)]
+        except:
+            p2_char = "None"
         return p2_char
 
     elif entity == "p1_name":
-        return str(game.metadata.players[0].netplay_name)
+        try:
+            return re.sub("[<>:\"/\\\\|?*]", '', str(game.metadata.players[0].netplay_name))
+        except:
+            return ""
 
     elif entity == "p2_name":
-        return str(game.metadata.players[1].netplay_name)
+        try:
+            return re.sub("[<>:\"/\\\\|?*]", '', str(game.metadata.players[1].netplay_name))
+        except:
+            return ""
 
     elif entity == "stage":
         return str(stage_names[str(game.start.stage)])
@@ -168,6 +177,7 @@ def fetch_entity(entity, game):
     elif entity == "duration":
         return str(game.metadata.duration)
 
+# Validates a user submitted template
 def is_template_valid(template):
     
     # Checks for invalid characters
@@ -185,22 +195,46 @@ def is_template_valid(template):
     
     return True
 
+# Makes the complete filename and checks for duplicate filenames
+def make_filename(filename):
+    unique_filename = filename
+    counter = 2
+
+    # Check for duplicate filenames
+    while os.path.isfile(unique_filename + ".slp"):
+        unique_filename = filename + " " + str(counter)
+        counter += 1
+
+    return unique_filename + ".slp"
 
 #Preset templates
 preset_templates = ["{year}-{month}-{day} {p1_char} vs {p2_char} on {stage}",
-                    "{day}.{month} {hour}:{minute} - {p1_char} vs {p2_char}",
-                    "{month}.{day} {hour}:{minute} - {p1_char} vs {p2_char}",
-                    "{p1_char}-{p2_char}-{stage}"]
+                    "{year}-{month}-{day} {p1_name} {p1_char} vs {p2_name} {p2_char} on {stage}",
+                    "{day}.{month} {hour}.{minute} - {p1_char} vs {p2_char}",
+                    "{month}.{day} {hour}.{minute} - {p1_char} vs {p2_char}",
+                    "{p1_char}-{p2_char}-{stage}",
+                    "{year}-{month}-{day} {p1_name} {p1_char} vs {p2_name} {p2_char}"]
+
+
+
+
 
 
 print("Welcome to Slippi Replay Renamer!")
-print("You can use this tool to rename your slippi replays however you like. We have a few template premade, but you can also make your own! The readme file contains information on how to format your own template.")
+print("This tool was made by Blink, the Norwegian Sheik player.")
+print("You can use this tool to rename your slippi replays however you like. We have a few templates premade, but you can also make your own! The readme file contains information on how to format your own template.")
+print("For more info see https://github.com/blink1415/slippi-replay-renamer/\n")
+
+os_version = {
+        "windows": "\\",
+        "linux": "/"
+}
 
 confirmed = False
 
 validchoices = ["0"]
 
-for i in range(1, len(preset_templates)):
+for i in range(1, len(preset_templates) + 1):
     validchoices.append(str(i))
 
 while not confirmed:
@@ -235,6 +269,8 @@ while not confirmed:
 
 terms = re.findall('\{.*?\}',template)
 
+error_games = []
+successful_games = 0
 
 # Renames all files in current directory and all subdirectories.
 for f in glob.glob('**/*.slp', recursive=True):
@@ -242,17 +278,36 @@ for f in glob.glob('**/*.slp', recursive=True):
     # Some games give an error in the parse.py module of py-slippi. I don't know what causes this.
     try:
         game = Game(f)
-    except:
+    except Exception as e:
         print("There was an error processing the following game:  \"%s\"" % f)
+        error_games.append(f)
+        #print(e)
+        #input()
         continue
         
     # File path needed to make sure files ends up in correct subfolder.
-    path = f.split("/")[0]
+    path = f.split(os_version["windows"])[0]
+
 
     filename = template
  
     for term in terms:
         value = fetch_entity(term, game)
         filename = filename.replace(term, value)
-    print("Renamed %s" % filename)
-    os.rename(f, path + "/" + filename + ".slp")
+    #print("-------")
+    final_filename = make_filename(path + os_version["windows"] + filename)
+    #print(f.split(os_version["windows"])[0])
+    #print(f)
+    print("Renamed %s" % final_filename)
+    #print(make_filename(path + os_version["windows"], filename + ".slp"))
+    os.rename(f, final_filename)
+    successful_games += 1
+
+print("\n-------------------------------")
+print("Number of games renamed: %d" % successful_games)
+print("-------------------------------")
+
+if len(error_games) > 0:
+    print("Number of games not processed due to an error: %s" % len(error_games))
+    print("Sorry about that, I'm working on fixing it! (>_<)")
+    print("-------------------------------")
