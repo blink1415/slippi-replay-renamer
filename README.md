@@ -26,21 +26,21 @@ The words inside {} are replaced with the info from each respective game. Below 
 Currently the supported terms to look for in the replays are the following:
 ```
 |Term                         |Value from replay                  |
-|"""""""""""""""""""""""""""""|"""""""""""""""""""""""""""""""""""|
+|-----------------------------|-----------------------------------|
 |{year}, {month}, {day},      |The respective values from the date|
 |{hour}, {minute}, {second}   |the game was originally played.    |
-|                             |                                   |
+|_____________________________|___________________________________|
 |{p1_char}, {p2_char}         |The character played by player 1   |
 |                             |and player 2 respectively.         |
-|                             |                                   |
+|_____________________________|___________________________________|
 |{stage}                      |The stage played in the match.     |
-|                             |                                   |
+|_____________________________|___________________________________|
 |{duration}                   |The duration of the game in number |
 |                             |of frames.                         |
-|                             |                                   |
+|_____________________________|___________________________________|
 |{p1_name}, {p2_name}         |Netplay name of player 1 and       |
 |                             |player 2 respectively.             |
-|-----------------------------|-----------------------------------|
+|_____________________________|___________________________________|
 ```
 
 The program will give you an error if you attempt to use a term that is not mentioned in this list.
