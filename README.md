@@ -1,9 +1,9 @@
 # slippi-replay-renamer
 Renames slippi replays according to a template defined by the user.
 
-## Installation
+## Installation and use
 
-I'll work on getting an executable together, but for now you need to use this with a python3 installation on your machine, as well as having py-slippi installed.
+Download the latest executable from the releases.
 
 Place the executable in a directory with .slp files, or a directory with subdirectories containing .slp files. Slippi stores your replays to C:\Users\Current_User\Documents\Slippi by default.
 
