@@ -99,33 +99,60 @@ def fetch_entity(entity, game):
         return str(game.metadata.date.year)
 
     elif entity == "month":
-        return str(game.metadata.date.month)
+        month = str(game.metadata.date.month)
+        if len(month) != 2:
+            month = "0" + month
+        return month
 
     elif entity == "day":
-        return str(game.metadata.date.day)
+        day = str(game.metadata.date.day)
+        if len(day) != 2:
+            day = "0" + day
+        return day
 
     elif entity == "hour":
-        return str(game.metadata.date.hour)
+        hour = str(game.metadata.date.hour)
+        if len(hour) != 2:
+            hour = "0" + hour
+        return hour
 
     elif entity == "minute":
-        return str(game.metadata.date.minute)
+        minute = str(game.metadata.date.minute)
+        if len(minute) != 2:
+            minute = "0" + minute
+        return minute
 
     elif entity == "second":
-        return str(game.metadata.date.second)
+        second = str(game.metadata.date.second)
+        if len(second) != 2:
+            second = "0" + second
+        return second
 
     elif entity == "p1_char":
         p1_char = ""
         for char in game.metadata.players[0].characters:
+
+            # Special case to handle Ice Climbers
+            if str(char) == "InGameCharacter.POPO":
+                return "Ice Climbers"
+
+            # This should only apply to Zelda/Sheik
             if p1_char != "":
-                p1_char += "/"
+                p1_char += "&"
             p1_char += character_names[str(char)]
         return p1_char
 
     elif entity == "p2_char":
         p2_char = ""
         for char in game.metadata.players[1].characters:
+            
+            # Special case to handle Ice Climbers
+            if str(char) == "InGameCharacter.POPO":
+                return "Ice Climbers"
+
+            # This should only apply to Zelda/Sheik
             if p2_char != "":
-                p2_char += "/"
+                p2_char += "&"
             p2_char += character_names[str(char)]
         return p2_char
 
@@ -171,15 +198,15 @@ print("You can use this tool to rename your slippi replays however you like. We 
 
 confirmed = False
 
-validchoices = ("0")
+validchoices = ["0"]
 
-for i in range(0, len(preset_templates)):
-    validchoices = (str(i),) + validchoices
+for i in range(1, len(preset_templates)):
+    validchoices.append(str(i))
 
 while not confirmed:
     print("Press the number corresponding to the template you want to use:")
     for i in range(0, len(preset_templates)):
-        print("%d. %s" % (i, preset_templates[i]))
+        print("%d. %s" % (i+1, preset_templates[i]))
     print("0. Custom template")    
 
     choice = input()
@@ -196,7 +223,7 @@ while not confirmed:
         while not is_template_valid(template):
             template = input("\nHow would you like your replays' name to be formatted?")
     else:
-        template = preset_templates[int(choice)]
+        template = preset_templates[int(choice) - 1]
 
     if len(re.findall('\{.*?\}',template)) == 0:
         print("Your template has no search terms. Multiple files cannot have the same name, so please select a template with terms.\n")
@@ -227,9 +254,5 @@ for f in glob.glob('**/*.slp', recursive=True):
     for term in terms:
         value = fetch_entity(term, game)
         filename = filename.replace(term, value)
-    #print("----------")
-    #print(f)
-    #print(path + "/" + filename + ".slp")
-    print(filename)
+    print("Renamed %s" % filename)
     os.rename(f, path + "/" + filename + ".slp")
-   # input()
