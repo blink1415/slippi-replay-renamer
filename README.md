@@ -20,7 +20,7 @@ A template looks like this:
 
 That template results in a filename like this:
 ```
-2020-8-1 Falco vs Sheik on Yoshi's Story.slp
+2020-08-01 Falco vs Sheik on Yoshi's Story.slp
 ```
 
 The words inside {} are replaced with the info from each respective game. Below is a list of supported terms.
