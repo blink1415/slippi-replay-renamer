@@ -56,6 +56,10 @@ Some characters are not valid to be used in filenames. For that reason you will 
 < > : " / \ | ? *
 ```
 
+### Duplicate filenames
+
+Some templates can result in duplicate filenames if they are not distinct enough. To solve this the program adds a counter at the end of the duplicates' names.
+
 ## Built With
 
 * [py-slippi](https://github.com/hohav/py-slippi) - The API used to access the .slp-files
