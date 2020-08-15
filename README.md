@@ -64,9 +64,11 @@ Some templates can result in duplicate filenames if they are not distinct enough
 
 * [py-slippi](https://github.com/hohav/py-slippi) - The API used to access the .slp-files
 
-## Authors
+## Contact
 
-* [**Blink**](https://twitter.com/BlinkSSBM) - *Initial work*
+**Blink**: 
+* [Twitter: @BlinkSSBM](https://twitter.com/BlinkSSBM) 
+* Discord: Blink#5922
 
 ## License
 
