@@ -1,7 +1,10 @@
 import glob
 import os
 import re
+import logging
 from slippi import Game  
+
+version = "v0.9.0"
 
 # More readable character names
 character_names = {
@@ -130,16 +133,19 @@ def fetch_entity(entity, game):
 
     elif entity == "p1_char":
         p1_char = ""
-        for char in game.metadata.players[0].characters:
+        try:
+            for char in game.metadata.players[0].characters:
 
-            # Special case to handle Ice Climbers
-            if str(char) == "InGameCharacter.POPO":
-                return "ICs"
+                # Special case to handle Ice Climbers
+                if str(char) == "InGameCharacter.POPO":
+                    return "ICs"
 
-            # This should only apply to Zelda/Sheik
-            if p1_char != "":
-                p1_char += "&"
-            p1_char += character_names[str(char)]
+                # This should only apply to Zelda/Sheik
+                if p1_char != "":
+                    p1_char += "&"
+                p1_char += character_names[str(char)]
+        except:
+            p1_char = "None"
         return p1_char
 
     elif entity == "p2_char":
@@ -213,15 +219,15 @@ preset_templates = ["{year}-{month}-{day} {p1_char} vs {p2_char} on {stage}",
                     "{day}.{month} {hour}.{minute} - {p1_char} vs {p2_char}",
                     "{month}.{day} {hour}.{minute} - {p1_char} vs {p2_char}",
                     "{p1_char}-{p2_char}-{stage}",
-                    "{year}-{month}-{day} {p1_name} {p1_char} vs {p2_name} {p2_char}"]
+                    "{year}-{month}-{day} {p1_name} {p1_char} vs {p2_name} {p2_char}",
+                    "{year}-{month}-{day} {hour}.{minute} {p1_name} {p1_char} vs {p2_name} {p2_char} on {stage}"]
 
 
 
 
 
 
-print("Welcome to Slippi Replay Renamer!")
-print("This tool was made by Blink, the Norwegian Sheik player.")
+print("Welcome to Slippi Replay Renamer " + version + "!")
 print("You can use this tool to rename your slippi replays however you like. We have a few templates premade, but you can also make your own! The readme file contains information on how to format your own template.")
 print("For more info see https://github.com/blink1415/slippi-replay-renamer/\n")
 
@@ -272,6 +278,9 @@ terms = re.findall('\{.*?\}',template)
 error_games = []
 successful_games = 0
 
+open("error-log.txt", "w").close()
+
+
 # Renames all files in current directory and all subdirectories.
 for f in glob.glob('**/*.slp', recursive=True):
     
@@ -279,14 +288,23 @@ for f in glob.glob('**/*.slp', recursive=True):
     try:
         game = Game(f)
     except Exception as e:
-        print("There was an error processing the following game:  \"%s\"" % f)
+        print("%d. There was an error processing the following game:  \"%s\"" % (len(error_games) + 1, f))
         error_games.append(f)
-        #print(e)
-        #input()
+
+        error_log = open("error-log.txt", "a")
+        error_log.write("\n---------------------------------------------------------")
+        error_log.write("\nThere was an error processing the following game:  \"%s\"\n" % f)
+        error_log.write(str(e))
+        error_log.close()
+
         continue
         
     # File path needed to make sure files ends up in correct subfolder.
-    path = f.split(os_version["windows"])[0]
+    path = f.split(os_version["windows"])
+    if len(path) > 1:
+        path = path[0] + os_version["windows"] 
+    else:
+        path = ""
 
 
     filename = template
@@ -294,11 +312,8 @@ for f in glob.glob('**/*.slp', recursive=True):
     for term in terms:
         value = fetch_entity(term, game)
         filename = filename.replace(term, value)
-    #print("-------")
-    final_filename = make_filename(path + os_version["windows"] + filename)
-    #print(f.split(os_version["windows"])[0])
-    #print(f)
-    print("Renamed %s" % final_filename)
+    final_filename = make_filename(path + filename)
+    print("%d. Renamed %s" % (successful_games + 1, final_filename))
     #print(make_filename(path + os_version["windows"], filename + ".slp"))
     os.rename(f, final_filename)
     successful_games += 1
@@ -310,4 +325,7 @@ print("-------------------------------")
 if len(error_games) > 0:
     print("Number of games not processed due to an error: %s" % len(error_games))
     print("Sorry about that, I'm working on fixing it! (>_<)")
+    print("Error logs have been written to error-log.txt. Feel free to send it to me so I can have a look at it! Contact info can be found on the github page.")
     print("-------------------------------")
+
+input("\nPress enter to exit the program.")
